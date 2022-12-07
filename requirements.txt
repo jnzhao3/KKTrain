@@ -1,0 +1,11 @@
+root
+uproot
+awkward
+numpy
+matplotlib
+tensorflow
+scikit-learn
+xgboost
+ipykernel
+pyyaml
+h5py
