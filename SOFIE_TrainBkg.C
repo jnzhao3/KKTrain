@@ -10,39 +10,52 @@
 
 using namespace TMVA::Experimental;
 
+TString pythonSrc = "\
+import os\n\
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'\n\
+\n\
+import tensorflow.keras as keras\n";
+
 void SOFIE_TrainBkg(){
+  //Running the Python script to generate Keras .h5 file
+  TMVA::PyMethodBase::PyInitialize();
+  TMacro m;                                                                                                          
+  m.AddLine(pythonSrc);
+  m.SaveSource("make_keras_model.py");                                                                                   
+  gSystem->Exec("python make_keras_model.py");
 
-    //Parsing the saved Keras .h5 file into RModel object
-    SOFIE::RModel model = SOFIE::PyKeras::Parse("TrainBkg.h5");
-//    model.Initialize(1); // overwrite batch size
 
-    //Generating inference code
-    model.Generate();
-//    cout << "Saving model as TrainBkg.cc" << endl;
-//    model.OutputGenerated("TrainBkg.cc");
-    model.OutputGenerated("TrainBkg.hxx");
+  //Parsing the saved Keras .h5 file into RModel object
+  SOFIE::RModel model = SOFIE::PyKeras::Parse("TrainBkg.h5");
+  //    model.Initialize(1); // overwrite batch size
 
-   //Printing required input tensors
-   std::cout<<"\n\n";
-   model.PrintRequiredInputTensors();
+  //Generating inference code
+  model.Generate();
+  //    cout << "Saving model as TrainBkg.cc" << endl;
+  //    model.OutputGenerated("TrainBkg.cc");
+  model.OutputGenerated("TrainBkg.hxx");
 
-   //Printing initialized tensors (weights)
-   std::cout<<"\n\n";
-   model.PrintInitializedTensors();
+  //Printing required input tensors
+  std::cout<<"\n\n";
+  model.PrintRequiredInputTensors();
 
-   //Printing intermediate tensors
-   std::cout<<"\n\n";
-   model.PrintIntermediateTensors();
+  //Printing initialized tensors (weights)
+  std::cout<<"\n\n";
+  model.PrintInitializedTensors();
 
-   //Checking if tensor already exist in model
-   std::cout<<"\n\nTensor \"dense2bias0\" already exist: "<<std::boolalpha<<model.CheckIfTensorAlreadyExist("dense2bias0")<<"\n\n";
-   std::vector<size_t> tensorShape = model.GetTensorShape("dense2bias0");
-   std::cout<<"Shape of tensor \"dense2bias0\": ";
-   for(auto& it:tensorShape){
-       std::cout<<it<<",";
-   }
-   std::cout<<"\n\nData type of tensor \"dense2bias0\": ";
-   SOFIE::ETensorType tensorType = model.GetTensorType("dense2bias0");
-   std::cout<<SOFIE::ConvertTypeToString(tensorType);
+  //Printing intermediate tensors
+  std::cout<<"\n\n";
+  model.PrintIntermediateTensors();
+
+  //Checking if tensor already exist in model
+  std::cout<<"\n\nTensor \"dense2bias0\" already exist: "<<std::boolalpha<<model.CheckIfTensorAlreadyExist("dense2bias0")<<"\n\n";
+  std::vector<size_t> tensorShape = model.GetTensorShape("dense2bias0");
+  std::cout<<"Shape of tensor \"dense2bias0\": ";
+  for(auto& it:tensorShape){
+    std::cout<<it<<",";
+  }
+  std::cout<<"\n\nData type of tensor \"dense2bias0\": ";
+  SOFIE::ETensorType tensorType = model.GetTensorType("dense2bias0");
+  std::cout<<SOFIE::ConvertTypeToString(tensorType);
 
 }
